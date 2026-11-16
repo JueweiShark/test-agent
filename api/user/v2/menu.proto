@@ -1,0 +1,134 @@
+syntax = "proto3";
+
+package api.user.v2;
+
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "validate/validate.proto";
+import "user/v2/common.proto";
+
+option go_package = "wuwen.com/wwuc/api_gen/user/v2;v2";
+option java_multiple_files = true;
+option java_package = "api.user.v2";
+
+// MenuV2 菜单管理 (复用 permission 表, type=1 的节点为菜单/按钮, menuType 区分)
+service MenuV2 {
+  // CreateMenu 超管建菜单节点
+//  rpc CreateMenu (CreateMenuRequest) returns (CreateMenuReply){
+//    option (google.api.http) = {
+//      post:"/v2/menu",
+//      body:"*",
+//    };
+//  };
+
+
+  // UpdateMenu 编辑菜单
+  rpc UpdateMenu (UpdateMenuRequest) returns (UpdateMenuReply){
+    option (google.api.http) = {
+      put:"/v2/menu/{id}",
+      body:"*",
+    };
+  };
+
+  // DeleteMenu 删除菜单
+//  rpc DeleteMenu (DeleteMenuRequest) returns (DeleteMenuReply){
+//    option (google.api.http) = {
+//      delete:"/v2/menu/{id}",
+//    };
+//  };
+
+
+  // ListMenus 按 app 查菜单树
+  rpc ListMenus (ListMenusRequest) returns (ListMenusReply){
+    option (google.api.http) = {
+      get:"/v2/menu",
+    };
+  };
+  // GetMenuTree 拿完整树结构 (按 app)
+  rpc GetMenuTree (GetMenuTreeRequest) returns (GetMenuTreeReply){
+    option (google.api.http) = {
+      get:"/v2/menu/tree",
+    };
+  };
+}
+
+message CreateMenuRequest {
+  string name = 1 [(validate.rules).string.min_len = 1];
+  int32 type = 2;                     // 0=backend 1=frontend 2=non
+  int32 menuType = 3;                // 1=目录 2=菜单 3=按钮
+  int64 app = 4;                      // 平台id
+  string routePath = 5;
+  string icon = 6;
+  int32 sort = 7;
+  string path = 8;                    // 后端API路径
+  string act = 9;
+  int64 dependence_parents = 10;      // 父节点id, 0=顶级
+  string domain = 11;
+}
+
+message CreateMenuReply {
+  int32 code = 1;
+  string message = 2;
+  message Data {
+    PermissionInfo menu = 3;
+  }
+  Data data = 3;
+}
+
+message UpdateMenuRequest {
+  int64 id = 1 [(validate.rules).int64.gt = 0];
+  string name = 2;                  // 名称
+  int32 sort = 6;                   // 排序
+  optional int32 hidden = 10;       // 1显示 0隐藏, 不传=不改
+  optional string description = 11; // 备注, 不传=不改; 传空串=清空
+}
+
+message UpdateMenuReply {
+  int32 code = 1;
+  string message = 2;
+}
+
+message DeleteMenuRequest {
+  int64 id = 1 [(validate.rules).int64.gt = 0];
+}
+
+message DeleteMenuReply {
+  int32 code = 1;
+  string message = 2;
+}
+
+message ListMenusRequest {
+  int64 app = 1;                       // 按平台过滤
+  int64 dependence_parents = 2;        // 按父节点过滤,不传=全部
+  int32 menuType = 3;                // 按菜单类型过滤
+  int64 groupId = 4;                 // 可选: 传入则只返回该企业 scope 内的菜单
+}
+
+message ListMenusReply {
+  int32 code = 1;
+  string message = 2;
+  message Data {
+    repeated PermissionInfo menus = 3;
+  }
+  Data data = 3;
+}
+
+message GetMenuTreeRequest {
+  int64 app = 1 [(validate.rules).int64.gt = 0];
+  int64 groupId = 2;                 // 可选: 传入则只返回该企业 scope 内的菜单
+  bool hidden = 3;
+}
+
+message MenuNode {
+  PermissionInfo info = 1;
+  repeated MenuNode children = 2;
+}
+
+message GetMenuTreeReply {
+  int32 code = 1;
+  string message = 2;
+  message Data {
+    repeated MenuNode tree = 3;
+  }
+  Data data = 3;
+}

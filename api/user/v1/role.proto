@@ -1,0 +1,103 @@
+syntax = "proto3";
+
+package api.user.v1;
+
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "validate/validate.proto";
+
+option go_package = "wuwen.com/wwuc/api_gen/user/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.user.v1";
+
+service Role {
+  rpc CreateRole (CreateRoleRequest) returns (CreateRoleReply){
+    option (google.api.http) = {
+      post:"/role/create",
+      body:"*",
+    };
+  };
+  rpc UpdateRole (UpdateRoleRequest) returns (UpdateRoleReply){
+    option (google.api.http) = {
+      put:"/role/{id}",
+      body:"*",
+    };
+  };
+  rpc DeleteRole (DeleteRoleRequest) returns (DeleteRoleReply){
+    option (google.api.http) = {
+      delete: "/role/{id}",
+    };
+  };
+  rpc GetRole (GetRoleRequest) returns (GetRoleReply){
+    option (google.api.http) = {
+      get: "/role/{id}",
+    };
+  };
+  rpc ListRole (ListRoleRequest) returns (ListRoleReply){
+    option (google.api.http) = {
+      get: "/role",
+    };
+  };
+}
+message RoleInfo{
+  int64 id = 1;
+  string name = 2;
+  string creator = 3;
+  int64 createdAt = 4;
+  repeated int64 permissionCodes = 5;
+  int64 system = 6;
+  string remarks = 7; //备注
+}
+message CreateRoleRequest {
+  string name = 1;
+  //int64 group_id = 2 [(validate.rules).int64.gt = 0, (google.api.field_behavior) = REQUIRED];
+  int64 group_id = 2 [(validate.rules).int64.gt = 0]; //具身的角色直接绑定用户
+  repeated int64 permissionCodes = 3;
+  int64 appId = 4;  //应用app的ID 1:仿真 2:具身
+  string remarks = 5; //备注
+}
+message CreateRoleReply {
+  int32 code = 1;
+  string message = 2;
+  int64 data = 3; // 创建的权限id
+}
+
+message UpdateRoleRequest {
+  int64 id = 1;
+  string name = 2;
+  int64 group_id = 3;
+  repeated int64 permissionCodes = 4;
+  string remarks = 5; //备注
+}
+message UpdateRoleReply {
+  int32 code = 1;
+  string message = 2;
+}
+
+message DeleteRoleRequest {
+  int64 id = 1;
+  int64 groupId =2;
+}
+message DeleteRoleReply {
+  int32 code = 1;
+  string message = 2;
+}
+
+message GetRoleRequest {
+  int64 id = 1;
+}
+message GetRoleReply {
+  int32 code = 1;
+  string message = 2;
+  RoleInfo data = 3;
+}
+
+message ListRoleRequest {
+  string name = 1;
+  int64 groupId = 2;
+}
+message ListRoleReply {
+  int32 code = 1;
+  string message = 2;
+  repeated RoleInfo data = 3;
+}

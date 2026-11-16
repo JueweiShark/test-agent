@@ -1,0 +1,156 @@
+syntax = "proto3";
+
+package api.user.v2;
+
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "validate/validate.proto";
+import "user/v2/common.proto";
+
+option go_package = "wuwen.com/wwuc/api_gen/user/v2;v2";
+option java_multiple_files = true;
+option java_package = "api.user.v2";
+
+// GroupV2 企业(租户)管理
+service GroupV2 {
+  // CreateGroup 超管创建企业
+  rpc CreateGroup (CreateGroupRequest) returns (CreateGroupReply){
+    option (google.api.http) = {
+      post:"/v2/group",
+      body:"*",
+    };
+  };
+  // UpdateGroup 超管更新企业
+  rpc UpdateGroup (UpdateGroupRequest) returns (UpdateGroupReply){
+    option (google.api.http) = {
+      put:"/v2/group/{groupId}",
+      body:"*",
+    };
+  };
+  // ListGroups 超管分页查企业列表
+  rpc ListGroups (ListGroupsRequest) returns (ListGroupsReply){
+    option (google.api.http) = {
+      get:"/v2/group",
+    };
+  };
+  // GetGroup 超管查企业详情
+  rpc GetGroup (GetGroupRequest) returns (GetGroupReply){
+    option (google.api.http) = {
+      get:"/v2/group/{groupId}",
+    };
+  };
+  // DeleteGroup 超管删除企业(软删)
+  rpc DeleteGroup (DeleteGroupRequest) returns (DeleteGroupReply){
+    option (google.api.http) = {
+      delete:"/v2/group/{groupId}",
+    };
+  };
+  // SetGroupPermissions 配置企业权限范围(全量覆盖+级联软删越界角色权限)
+  rpc SetGroupPermissions (SetGroupPermissionsRequest) returns (SetGroupPermissionsReply){
+    option (google.api.http) = {
+      post:"/v2/group/{groupId}/permissions",
+      body:"*",
+    };
+  };
+  // ListGroupPermissions 查企业权限范围
+  rpc ListGroupPermissions (ListGroupPermissionsRequest) returns (ListGroupPermissionsReply){
+    option (google.api.http) = {
+      get:"/v2/group/{groupId}/permissions",
+    };
+  };
+}
+
+message CreateGroupRequest {
+  string name = 1 [(validate.rules).string.min_len = 1];
+  string group_code = 2;
+  string remarks = 3;
+  // 1 启用 2停用
+  int32 status = 4;
+}
+
+message CreateGroupReply {
+  int32 code = 1;
+  string message = 2;
+  message Data {
+    GroupInfo group = 3;
+  }
+  Data data = 3;
+}
+
+message UpdateGroupRequest {
+  int64 groupId = 1 [(validate.rules).int64.gt = 0];
+  string name = 2;
+  string group_code = 3;
+  string remarks = 4;
+  int32 status = 5;
+}
+
+message UpdateGroupReply {
+  int32 code = 1;
+  string message = 2;
+}
+
+message DeleteGroupRequest {
+  int64 groupId = 1 [(validate.rules).int64.gt = 0];
+}
+
+message DeleteGroupReply {
+  int32 code = 1;
+  string message = 2;
+}
+
+message GetGroupRequest {
+  int64 groupId = 1 [(validate.rules).int64.gt = 0];
+}
+
+message GetGroupReply {
+  int32 code = 1;
+  string message = 2;
+  message Data {
+    GroupInfo group = 3;
+  }
+  Data data = 3;
+}
+
+message ListGroupsRequest {
+  int32 page = 1;
+  int32 pageSize = 2;
+  string name = 3;
+  string group_code = 4;
+  int32 status = 5;
+  int64 id = 6;
+  repeated int64 ids = 7;
+}
+
+message ListGroupsReply {
+  int32 code = 1;
+  string message = 2;
+  message Data {
+    repeated GroupInfo list = 3;
+    int64 total = 4;
+  }
+  Data data = 3;
+}
+
+message SetGroupPermissionsRequest {
+  int64 groupId = 1 [(validate.rules).int64.gt = 0];
+  repeated int64 permission_ids = 2;  // 全量覆盖: 传入列表即企业 scope 最终状态
+}
+
+message SetGroupPermissionsReply {
+  int32 code = 1;
+  string message = 2;
+}
+
+message ListGroupPermissionsRequest {
+  int64 groupId = 1 [(validate.rules).int64.gt = 0];
+}
+
+message ListGroupPermissionsReply {
+  int32 code = 1;
+  string message = 2;
+  message Data {
+    repeated int64 permission_ids = 3;  // 企业已配置的权限 id 列表
+  }
+  Data data = 3;
+}

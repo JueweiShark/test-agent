@@ -1,0 +1,93 @@
+syntax = "proto3";
+
+package api.user.v2;
+
+option go_package = "wuwen.com/wwuc/api_gen/user/v2;v2";
+option java_multiple_files = true;
+option java_package = "api.user.v2";
+
+// UserInfo 用户基本信息
+message UserInfo {
+  int64 userId = 1;
+  string username = 2;
+  string nickname = 3;
+  string password = 4;
+}
+
+// GroupInfo 企业信息
+message GroupInfo {
+  int64 groupId = 1;
+  string group_name = 2;
+  string group_code = 3;
+  // 企业创建时间
+  int64 group_created_at = 4;
+  int32 status = 5;
+  repeated RoleInfo roles = 6;
+  repeated AppInfo apps = 7;
+  // 创建时间
+  int64 createdAt = 8;
+  // 更新时间
+  int64 updatedAt = 9;
+  string remarks = 10;
+}
+
+// RoleInfo 角色信息
+message RoleInfo {
+  int64 roleId = 1;
+  string roleName = 2;
+  string remarks = 3;
+  int32 system = 4;                  // 1=系统角色不可编辑
+  int64 groupId = 5;
+  int64 app = 6;                      // 老字段保留,新逻辑不读写
+  string roleCode = 7;               // 角色编码 role+id, 如 role00003, 创建后自动生成只读
+}
+
+// RoleDetailInfo 角色详情信息 (含企业名称/时间戳/菜单权限)
+message RoleDetailInfo {
+  int64 roleId = 1;
+  int64 groupId = 2;
+  string groupName = 3;              // 企业名称 (来自 group.name)
+  string roleName = 4;
+  string roleCode = 5;               // 角色编码, 如 role00003
+  string remarks = 6;
+  int32 system = 7;                  // 1=系统角色不可编辑
+  int64 app = 8;                     // 老字段保留
+  int64 createdAt = 9;               // 角色创建时间 (role.created_at, unix 秒)
+  int64 updatedAt = 10;              // 角色更新时间 (role.updated_at, unix 秒)
+  repeated PermissionInfo permissions = 11;  // 角色绑定的菜单权限 (来自 ref_role_permission + permission)
+}
+
+// AppInfo 平台信息
+message AppInfo {
+  int64 id = 1;
+  string name = 2;
+  string code = 3;
+  string entryUrl = 4;
+  string icon = 5;
+  int32 sort = 6;
+  int32 status = 7;                   // 1=显示 0=隐藏
+  string type = 8;                    // app 类型: platform=平台, link=链接
+  string desc = 9;                    // 描述&简介
+  string detail = 10;
+  // 返回 icon的url
+  string iconUrl = 11;
+}
+
+// PermissionInfo 权限/菜单信息
+message PermissionInfo {
+  int64 id = 1;
+  string name = 2;
+  int32 type = 3;                     // 0=backend 1=frontend 2=non
+  int32 menuType = 4;                // 1=目录 2=菜单 3=按钮, 仅 type=1 时有效
+  string routePath = 5;
+  string icon = 6;
+  int32 sort = 7;
+  int64 app = 8;                      // 平台id
+  string path = 9;                    // 后端API路径
+  string act = 10;                    // HTTP method
+  int64 code = 11;                    // 权限code
+  repeated int64 dependenceChildren = 12;
+  int64 dependence_parents = 13;
+  int32 hidden = 14;                  // 1显示 0隐藏
+  string description = 15;            // 备注
+}

@@ -1,0 +1,91 @@
+syntax = "proto3";
+
+package api.user.v1;
+
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "validate/validate.proto";
+
+option go_package = "wuwen.com/wwuc/api_gen/user/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.user.v1";
+
+service Permission {
+  rpc ListPermission (ListPermissionRequest) returns (ListPermissionReply){
+    option (google.api.http) = {
+      get: "/permission",
+    };
+  };
+
+  rpc UpdatePermission (UpdatePermissionRequest) returns (UpdatePermissionReply){
+    option (google.api.http) = {
+      put:"/permission/{id}",
+      body:"*",
+    };
+  };
+
+  rpc CreatePermission (CreatePermissionRequest) returns (CreatePermissionReply){
+    option (google.api.http) = {
+      post:"/permission",
+      body:"*",
+    };
+  };
+
+  rpc DeletePermission (DeletePermissionRequest) returns (DeletePermissionReply){
+    option (google.api.http) = {
+      delete: "/group/{id}",
+    };
+  };
+
+}
+
+message PermissionInfo{
+  int64 id = 1;
+  int64  code = 2;
+  string name = 3;
+  string route = 4;
+  string path = 5;
+}
+message ListPermissionRequest {
+
+}
+message ListPermissionReply {
+  int32 code = 1;
+  string message = 2;
+  repeated PermissionInfo data = 3;
+}
+
+message CreatePermissionRequest {
+  string domain = 1;
+  int64  code = 2;
+  string name = 3;
+  string route = 4;
+  string path = 5;
+  string method = 6;
+}
+message CreatePermissionReply {
+  int32 code = 1;
+  string message = 2;
+  int64 data = 3;
+}
+
+message UpdatePermissionRequest {
+  int64 id = 1;
+  int64  code = 2;
+  string name = 3;
+  string route = 4;
+  string path = 5;
+}
+message UpdatePermissionReply {
+  int32 code = 1;
+  string message = 2;
+  int64 data = 3;
+}
+
+message DeletePermissionRequest {
+  int64 id = 1;
+}
+message DeletePermissionReply {
+  int32 code = 1;
+  string message = 2;
+}

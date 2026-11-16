@@ -1,0 +1,486 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "user/v2/system.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "SystemV2"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v2/system/apps": {
+      "get": {
+        "summary": "ListApps 拿产品列表 (总览图标)",
+        "operationId": "SystemV2_ListApps",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v2ListAppsReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "groupId",
+            "description": "当前用户所在企业 id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "type",
+            "description": "app 类型: platform=平台, link=链接; 不传=不限",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "SystemV2"
+        ]
+      },
+      "post": {
+        "summary": "CreateApp 超管创建产品",
+        "operationId": "SystemV2_CreateApp",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v2CreateAppReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v2CreateAppRequest"
+            }
+          }
+        ],
+        "tags": [
+          "SystemV2"
+        ]
+      }
+    },
+    "/v2/system/apps/page": {
+      "get": {
+        "summary": "ListAppsByPage 分页查询产品列表 (管理端)",
+        "operationId": "SystemV2_ListAppsByPage",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v2ListAppsByPageReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "name",
+            "description": "显示名 (模糊匹配)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "code",
+            "description": "app 编号 (模糊匹配)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "description": "1=显示 0=隐藏, 0=不限",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "type",
+            "description": "app 类型: platform=平台, link=链接; 不传=不限",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "SystemV2"
+        ]
+      }
+    },
+    "/v2/system/apps/{appId}": {
+      "delete": {
+        "summary": "删除App",
+        "operationId": "SystemV2_DeleteApp",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v2DeleteAppReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "SystemV2"
+        ]
+      },
+      "put": {
+        "summary": "UpdateApp 超管更新产品",
+        "operationId": "SystemV2_UpdateApp",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v2UpdateAppReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SystemV2UpdateAppBody"
+            }
+          }
+        ],
+        "tags": [
+          "SystemV2"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "SystemV2UpdateAppBody": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        },
+        "entryUrl": {
+          "type": "string"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "sort": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "type": {
+          "type": "string",
+          "title": "app 类型: platform=平台, link=链接"
+        },
+        "desc": {
+          "type": "string",
+          "title": "描述\u0026简介"
+        },
+        "detail": {
+          "type": "string",
+          "title": "JSON扩展"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int32",
+          "title": "1=显示 0=隐藏"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v2AppInfo": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        },
+        "entryUrl": {
+          "type": "string"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "sort": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int32",
+          "title": "1=显示 0=隐藏"
+        },
+        "type": {
+          "type": "string",
+          "title": "app 类型: platform=平台, link=链接"
+        },
+        "desc": {
+          "type": "string",
+          "title": "描述\u0026简介"
+        },
+        "detail": {
+          "type": "string"
+        },
+        "iconUrl": {
+          "type": "string",
+          "title": "返回 icon的url"
+        }
+      },
+      "title": "AppInfo 平台信息"
+    },
+    "v2CreateAppReply": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/v2CreateAppReplyData"
+        }
+      }
+    },
+    "v2CreateAppReplyData": {
+      "type": "object",
+      "properties": {
+        "app": {
+          "$ref": "#/definitions/v2AppInfo"
+        }
+      }
+    },
+    "v2CreateAppRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        },
+        "entryUrl": {
+          "type": "string"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "sort": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "type": {
+          "type": "string",
+          "title": "app 类型: platform=平台, link=链接"
+        },
+        "desc": {
+          "type": "string",
+          "title": "描述\u0026简介"
+        },
+        "detail": {
+          "type": "string",
+          "title": "JSON扩展"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int32",
+          "title": "1=显示 0=隐藏"
+        }
+      }
+    },
+    "v2DeleteAppReply": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "v2ListAppsByPageReply": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/v2ListAppsByPageReplyData"
+        }
+      }
+    },
+    "v2ListAppsByPageReplyData": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v2AppInfo"
+          }
+        },
+        "total": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "v2ListAppsReply": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/v2ListAppsReplyData"
+        }
+      }
+    },
+    "v2ListAppsReplyData": {
+      "type": "object",
+      "properties": {
+        "apps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v2AppInfo"
+          }
+        }
+      }
+    },
+    "v2UpdateAppReply": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

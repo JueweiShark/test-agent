@@ -1,0 +1,539 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "user/v2/user.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "UserV2"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v2/user": {
+      "get": {
+        "summary": "ListUsers 用户名单",
+        "operationId": "UserV2_ListUsers",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v2ListUsersV2Reply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "username",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "nickname",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "UserV2"
+        ]
+      },
+      "post": {
+        "summary": "CreateUser 超管创建用户",
+        "operationId": "UserV2_CreateUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v2CreateUserV2Reply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v2CreateUserV2Request"
+            }
+          }
+        ],
+        "tags": [
+          "UserV2"
+        ]
+      }
+    },
+    "/v2/user/{userId}": {
+      "get": {
+        "summary": "GetUser 查用户详情",
+        "operationId": "UserV2_GetUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v2GetUserV2Reply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "UserV2"
+        ]
+      },
+      "put": {
+        "summary": "UpdateUser 更新用户信息 (昵称/显隐状态/备注)",
+        "operationId": "UserV2_UpdateUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v2UpdateUserV2Reply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v2UserV2UpdateUserBody"
+            }
+          }
+        ],
+        "tags": [
+          "UserV2"
+        ]
+      }
+    },
+    "/v2/user/{userId}/password": {
+      "put": {
+        "summary": "UpdatePassword 超管修改用户密码 (超管指定新密码, 不回显明文)",
+        "operationId": "UserV2_UpdatePassword",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v2UpdatePasswordReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserV2UpdatePasswordBody"
+            }
+          }
+        ],
+        "tags": [
+          "UserV2"
+        ]
+      }
+    },
+    "/v2/user/{userId}/reset_password": {
+      "post": {
+        "summary": "ResetPassword 超管重置用户密码",
+        "operationId": "UserV2_ResetPassword",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v2ResetPasswordReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserV2ResetPasswordBody"
+            }
+          }
+        ],
+        "tags": [
+          "UserV2"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "UserV2ResetPasswordBody": {
+      "type": "object",
+      "properties": {
+        "password": {
+          "type": "string",
+          "title": "password 已废弃: 后端自动生成新密码并返回, 前端无需传入"
+        }
+      }
+    },
+    "UserV2UpdatePasswordBody": {
+      "type": "object",
+      "properties": {
+        "password": {
+          "type": "string",
+          "title": "password 超管指定的新密码 (明文, 后端校验规则后哈希存储, 不回显)"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "userv2UserInfo": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "username": {
+          "type": "string"
+        },
+        "nickname": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      },
+      "title": "UserInfo 用户基本信息"
+    },
+    "v2CreateUserV2Reply": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/v2CreateUserV2ReplyData"
+        }
+      }
+    },
+    "v2CreateUserV2ReplyData": {
+      "type": "object",
+      "properties": {
+        "userInfo": {
+          "$ref": "#/definitions/userv2UserInfo"
+        },
+        "password": {
+          "type": "string",
+          "title": "password 后端自动生成的初始密码 (明文, 仅本次返回)"
+        }
+      }
+    },
+    "v2CreateUserV2Request": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string",
+          "title": "password 已废弃: 后端自动生成密码并返回, 前端无需传入"
+        },
+        "nickname": {
+          "type": "string"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int32",
+          "title": "1 启用 2停用"
+        },
+        "remarks": {
+          "type": "string",
+          "title": "备注"
+        }
+      }
+    },
+    "v2GetUserV2Reply": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/v2GetUserV2ReplyData"
+        }
+      }
+    },
+    "v2GetUserV2ReplyData": {
+      "type": "object",
+      "properties": {
+        "user": {
+          "$ref": "#/definitions/v2UserDetailInfo"
+        }
+      }
+    },
+    "v2ListUsersV2Reply": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/v2ListUsersV2ReplyData"
+        }
+      }
+    },
+    "v2ListUsersV2ReplyData": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v2UserDetailInfo"
+          }
+        },
+        "total": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "v2ResetPasswordReply": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/v2ResetPasswordReplyData"
+        }
+      }
+    },
+    "v2ResetPasswordReplyData": {
+      "type": "object",
+      "properties": {
+        "password": {
+          "type": "string",
+          "title": "password 后端自动生成的新密码 (明文, 仅本次返回)"
+        }
+      }
+    },
+    "v2UpdatePasswordReply": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "v2UpdateUserV2Reply": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "v2UserDetailInfo": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64",
+          "title": "ID"
+        },
+        "username": {
+          "type": "string",
+          "title": "用户名"
+        },
+        "nickname": {
+          "type": "string",
+          "title": "姓名\u0026昵称"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int32",
+          "title": "状态"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "int64",
+          "title": "创建时间"
+        },
+        "lastLoginAt": {
+          "type": "string",
+          "format": "int64",
+          "title": "上次登录数据"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "int64",
+          "title": "更新时间"
+        },
+        "remarks": {
+          "type": "string",
+          "title": "备注"
+        }
+      }
+    },
+    "v2UserV2UpdateUserBody": {
+      "type": "object",
+      "properties": {
+        "nickname": {
+          "type": "string",
+          "title": "姓名\u0026昵称"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int32",
+          "title": "显隐状态 1=显示 0=隐藏 (复用 status 字段)"
+        },
+        "remarks": {
+          "type": "string",
+          "title": "备注"
+        }
+      }
+    }
+  }
+}

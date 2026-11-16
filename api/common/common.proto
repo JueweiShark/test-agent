@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package common;
+
+import "google/protobuf/descriptor.proto";
+import "errors/errors.proto";
+
+option go_package = "wuwen.com/wwuc/api_gen/common;common";
+
+extend google.protobuf.FieldOptions {
+  string json_name = 51234;
+}
+enum ErrorReason {
+  option (errors.default_code) = 500;
+  PARAMS_VALIDATOR_FAIL= 0[(errors.code)=200];
+}
+
+message ParamsInvalidReplay{
+  int32 code = 1;
+  string message = 2;
+}
+
+message UploadFileRequest{
+  bytes file = 1;
+  string fileName = 2;
+}

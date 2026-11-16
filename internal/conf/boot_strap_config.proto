@@ -1,0 +1,18 @@
+
+syntax = "proto3";
+package kratos.api;
+
+option go_package = "wuwen.com/wwuc/internal/conf;conf";
+
+import "google/protobuf/duration.proto";
+
+message RemoteConfig {
+  string host = 1;
+  string dataId = 2;
+  string namespaceId = 3;
+  string logLevel = 4; // one of debug,info,warn,error
+  string type = 5;
+  string groupId = 6;
+  string userName =7;
+  string pwd =8;
+}

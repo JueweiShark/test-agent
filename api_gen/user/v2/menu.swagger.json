@@ -1,0 +1,368 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "user/v2/menu.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "MenuV2"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v2/menu": {
+      "get": {
+        "summary": "ListMenus 按 app 查菜单树",
+        "operationId": "MenuV2_ListMenus",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v2ListMenusReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "app",
+            "description": "按平台过滤",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "dependenceParents",
+            "description": "按父节点过滤,不传=全部",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "menuType",
+            "description": "按菜单类型过滤",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "groupId",
+            "description": "可选: 传入则只返回该企业 scope 内的菜单",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "MenuV2"
+        ]
+      }
+    },
+    "/v2/menu/tree": {
+      "get": {
+        "summary": "GetMenuTree 拿完整树结构 (按 app)",
+        "operationId": "MenuV2_GetMenuTree",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v2GetMenuTreeReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "app",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "groupId",
+            "description": "可选: 传入则只返回该企业 scope 内的菜单",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "hidden",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": [
+          "MenuV2"
+        ]
+      }
+    },
+    "/v2/menu/{id}": {
+      "put": {
+        "summary": "UpdateMenu 编辑菜单",
+        "operationId": "MenuV2_UpdateMenu",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v2UpdateMenuReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/MenuV2UpdateMenuBody"
+            }
+          }
+        ],
+        "tags": [
+          "MenuV2"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "MenuV2UpdateMenuBody": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "名称"
+        },
+        "sort": {
+          "type": "integer",
+          "format": "int32",
+          "title": "排序"
+        },
+        "hidden": {
+          "type": "integer",
+          "format": "int32",
+          "title": "1显示 0隐藏, 不传=不改"
+        },
+        "description": {
+          "type": "string",
+          "title": "备注, 不传=不改; 传空串=清空"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "userv2PermissionInfo": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "integer",
+          "format": "int32",
+          "title": "0=backend 1=frontend 2=non"
+        },
+        "menuType": {
+          "type": "integer",
+          "format": "int32",
+          "title": "1=目录 2=菜单 3=按钮, 仅 type=1 时有效"
+        },
+        "routePath": {
+          "type": "string"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "sort": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "app": {
+          "type": "string",
+          "format": "int64",
+          "title": "平台id"
+        },
+        "path": {
+          "type": "string",
+          "title": "后端API路径"
+        },
+        "act": {
+          "type": "string",
+          "title": "HTTP method"
+        },
+        "code": {
+          "type": "string",
+          "format": "int64",
+          "title": "权限code"
+        },
+        "dependenceChildren": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "int64"
+          }
+        },
+        "dependenceParents": {
+          "type": "string",
+          "format": "int64"
+        },
+        "hidden": {
+          "type": "integer",
+          "format": "int32",
+          "title": "1显示 0隐藏"
+        },
+        "description": {
+          "type": "string",
+          "title": "备注"
+        }
+      },
+      "title": "PermissionInfo 权限/菜单信息"
+    },
+    "v2GetMenuTreeReply": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/v2GetMenuTreeReplyData"
+        }
+      }
+    },
+    "v2GetMenuTreeReplyData": {
+      "type": "object",
+      "properties": {
+        "tree": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v2MenuNode"
+          }
+        }
+      }
+    },
+    "v2ListMenusReply": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/v2ListMenusReplyData"
+        }
+      }
+    },
+    "v2ListMenusReplyData": {
+      "type": "object",
+      "properties": {
+        "menus": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/userv2PermissionInfo"
+          }
+        }
+      }
+    },
+    "v2MenuNode": {
+      "type": "object",
+      "properties": {
+        "info": {
+          "$ref": "#/definitions/userv2PermissionInfo"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v2MenuNode"
+          }
+        }
+      }
+    },
+    "v2UpdateMenuReply": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

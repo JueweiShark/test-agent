@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "wwuc.fullname" . }}
+  labels:
+    {{- include "wwuc.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      #nodePort: {{ .Values.service.port }}
+      #nodePort: 32702
+      name: http
+    - port: 9101
+      targetPort: 9101
+      protocol: TCP
+      #nodePort: 9001
+      name: grpcport
+  selector:
+    {{- include "wwuc.selectorLabels" . | nindent 4 }}

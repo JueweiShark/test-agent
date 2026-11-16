@@ -1,0 +1,272 @@
+syntax = "proto3";
+
+package api.user.v1;
+
+option go_package = "wuwen.com/wwuc/api_gen/user/v1;v1";
+
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "validate/validate.proto";
+import "user/v1/group.proto";
+import "user/v1/role.proto";
+
+service User {
+  rpc CreateUser (CreateUserRequest) returns (CreateUserReply){
+    option (google.api.http) = {
+      post:"/user",
+      body:"*",
+    };
+  };
+  rpc CreateInnerUser (CreateUserRequest) returns (CreateUserReply);
+
+  rpc UpdateUser (UpdateUserRequest) returns (UpdateUserReply){
+    option (google.api.http) = {
+      put:"/user/{id}",
+      body:"*",
+    };
+  };
+  // 更新用户信息
+  rpc UpdateInfo (UpdateInfoRequest) returns (UpdateInfoReply){
+    option (google.api.http) = {
+      post:"/user/info",
+      body:"*",
+    };
+  };
+  rpc UpdateUserRole (UpdateUserRoleRequest) returns (UpdateUserReply){
+    option (google.api.http) = {
+      put:"/user/{id}/role",
+      body:"*",
+    };
+  };
+  rpc DeleteUser (DeleteUserRequest) returns (DeleteUserReply){
+    option (google.api.http) = {
+      delete: "/user/{id}",
+    };
+  };
+  //禁用用户
+  rpc ForbiddenUser (ForbiddenUserRequest) returns (ForbiddenUserReply){
+    option (google.api.http) = {
+      post: "/user/forbidden",
+      body:"*",
+    };
+  };
+  rpc UserInfo (GetUserRequest) returns (GetUserReply){
+    option (google.api.http) = {
+      get: "/user/{id}",
+    };
+  };
+  rpc CurrentUserInfo (Empty) returns (GetUserReply){};
+  rpc UserGroupInfo (GetUserRequest) returns (GetUserGroupInfoReply){
+    option (google.api.http) = {
+      get: "/user/{id}/group",
+    };
+  };
+  rpc ListUser (ListUserRequest) returns (ListUserReply){
+    option (google.api.http) = {
+      get: "/user",
+    };
+  };
+
+//权限判断的用户列表
+  rpc ListPermissionUser (ListUserRequest) returns (ListUserReply){
+    option (google.api.http) = {
+      get: "/listPermissionUser",
+    };
+  };
+
+  rpc Login (LoginRequest) returns (LoginReply){
+    option (google.api.http) = {
+      post:"/user/login",
+      body:"*",
+    };
+  };
+
+  rpc Uid2Token (Uid2TokenRequest) returns (LoginReply);
+
+  rpc Logout (LogoutRequest) returns (LogoutReply){
+    option (google.api.http) = {
+      post:"/user/logout",
+      body:"*",
+    };
+  };
+
+  rpc checkToken(checkTokenRequest)returns (checkTokenReply){};
+  rpc BatchFindUserUserFindRequest(UserFindRequest) returns(UserFindReply){}
+  rpc FindUserGroupRoleRequest(GetUserRequest) returns(GetUserGroupInfoReply);
+  rpc FindUserByCondRequest(FindUserCondRequest) returns(UserFindReply){
+    option (google.api.http) = {
+      post:"/user/findUserByCondRequest",
+      body:"*",
+    };
+  };
+}
+message UserFindRequest{
+  repeated int64 ids = 1; // 用户id
+}
+
+message UserFindReply{
+  int32 code = 1;
+  string message = 2;
+  repeated UserInfo data = 3;
+}
+message Empty {
+
+}
+message checkTokenRequest{
+  string token = 1;
+}
+message checkTokenReply{
+  bool result = 1;
+}
+message UserSimple{
+  int64 id = 1;
+  string nickname = 2;
+}
+message UserInfo{
+  int64 id = 1;
+  string username = 2;
+  string nickname = 3;
+  string avatarId = 4;
+  int64 createdAt = 5;
+  int64 updatedAt = 6;
+  int64 lastLoginAt = 7;
+  int32 status = 8;
+  repeated GroupInfo groupInfo = 10;
+  RoleInfo roleInfo = 11;
+}
+
+message CreateUserRequest {
+//  string username = 1 [(validate.rules).string = {email:true,max_len:64}, (google.api.field_behavior) = REQUIRED];
+//  string password = 2 [(validate.rules).string = {pattern:"^[A-Za-z\\d!@#%&]{6,20}$" max_len:20}, (google.api.field_behavior) = REQUIRED];
+  string username = 1 [(validate.rules).string = {min_len:1,max_len:64}, (google.api.field_behavior) = REQUIRED];
+  string password = 2 [(validate.rules).string = {min_len:1,max_len:20},  (google.api.field_behavior) = REQUIRED];
+  repeated int64 roleIds = 3;
+  string nickname = 4[(validate.rules).string = {min_len:1,max_len:50}, (google.api.field_behavior) = REQUIRED];
+  int64 groupId = 5;
+  int64 appId = 6; //应用app的ID 1:仿真 2:具身
+}
+message CreateUserReply {
+  message Data {
+    int64 userId = 1;
+  }
+  int32 code = 1;
+  string message = 2;
+  Data data = 3;
+}
+
+
+message UpdateUserRoleRequest{
+  int64 id = 1;
+  repeated  int64 roleIds = 2;
+  int64 groupId = 3;
+}
+message UpdateUserRequest {
+  int64 id = 1[(validate.rules).int64 = {gt:0}, (google.api.field_behavior) = REQUIRED];
+  string nickname = 2[(validate.rules).string = {max_len:50}];
+  string password = 3[(validate.rules).string = {max_len:20}];
+  string oldPassword = 4[(validate.rules).string = {max_len:20}];
+
+}
+message UpdateUserReply {
+  int32 code = 1;
+  string message = 2;
+}
+
+message UpdateInfoRequest {
+  // 用户id
+  int64 id = 1[(google.api.field_behavior) = REQUIRED];
+  // 昵称
+  string nickname = 2;
+  // 角色id
+  int64 roleId = 3;
+}
+
+message UpdateInfoReply {
+  int32 code = 1;
+  string message = 2;
+}
+
+message DeleteUserRequest {
+  int64 id = 1;
+}
+message DeleteUserReply {
+  int32 code = 1;
+  string message = 2;
+}
+
+message ForbiddenUserRequest {
+  int64 id = 1;
+  int64 status = 2; //0:禁用 1:启用
+}
+message ForbiddenUserReply {
+  int32 code = 1;
+  string message = 2;
+}
+message GetUserRequest {
+  int64 id = 1;
+  string source = 2;
+}
+message GetUserReply {
+  int32 code = 1;
+  string message = 2;
+  UserInfo data = 3;
+}
+message GetUserGroupInfoReply {
+  int32 code = 1;
+  string message = 2;
+  repeated GroupInfo data = 3;
+}
+
+message ListUserRequest {
+  int64 page_no = 1;
+  int64 page_size = 2;
+  optional string nickname = 3; // 筛选项：昵称
+  optional string username = 4; // 筛选项：账号
+  optional int32 status = 5;    // 筛选项：状态值 0:禁用 1:启用
+}
+
+message ListUserReply {
+  int32 code = 1;
+  string message = 2;
+  listData data = 3;
+  message listData{
+    int64 total = 1;
+    int64 page_size = 2;
+    int64 page_no = 3 ;
+    repeated UserInfo list = 4;
+  }
+}
+message LoginRequest{
+  string username = 1;
+  string password = 2;
+  int64  appId = 3; //应用 1:仿真 2:具身
+}
+message LoginReply{
+  message loginData {
+    string token = 1;
+    UserInfo user = 2;
+  }
+  int32 code = 1;
+  string message = 2;
+  loginData data = 3;
+}
+
+message Uid2TokenRequest{
+  int64 userId = 1;
+  int64  appId = 2; //应用 1:仿真 2:具身
+}
+
+message LogoutRequest{
+
+}
+message LogoutReply{
+  int32 code = 1;
+  string message = 2;
+}
+
+message FindUserCondRequest {
+  string username = 1;
+  string nickname = 2;
+  repeated int64 ids = 3;
+  int64 appId = 4;    //2:具身
+}

@@ -1,0 +1,180 @@
+syntax = "proto3";
+package kratos.api;
+
+option go_package = "wuwen.com/wwuc/internal/conf;conf";
+
+import "google/protobuf/duration.proto";
+
+message CarboonWsiBootstrap{
+  Bootstrap carboonWsiBootstrap = 1;
+}
+message Bootstrap {
+  Server server = 1;
+  Data data = 2;
+  Log log = 3;
+  ServiceConfig service_conf = 4;
+  Test test = 5;
+  OSS oss = 6;
+  Jwt jwt = 7;
+  ChangAn ca = 8;
+  Password password = 9;
+  Trace trace = 10;
+}
+
+// Trace 链路追踪配置（OpenTelemetry OTLP 上报，兼容腾讯云 APM / 自建 Jaeger）
+message Trace {
+  bool enable = 1;           // 是否开启链路追踪
+  string endpoint = 2;       // OTLP gRPC 上报地址，如 ap-guangzhou.apm.tencentcs.com:4317
+  string token = 3;          // 上报鉴权 token（腾讯云 APM 为 X-CTG-Token，自建可留空）
+  double samplerRatio = 4;   // 采样率 0~1，1 表示全量；<=0 时默认 0.1
+  bool insecure = 5;         // 是否禁用 TLS（自建 Jaeger 未开 TLS 时设 true）
+  string serviceEnv = 6;     // 部署环境标识，写入 resource attribute
+}
+message ServiceConfig{
+  enum conf_type{
+    polaris = 0;
+    local = 1;
+  }
+  message PolarisConf{
+    message PolarisGlobal{
+      message ServerConnector{
+        repeated string address = 1;
+      }
+      ServerConnector serverConnector = 1;
+    }
+    repeated Service services = 1;
+    string nameSpace = 2;
+    int32 logLevel = 3;
+    string logPath = 4;
+    PolarisGlobal global = 5;
+  }
+
+  message LocalConfig{
+    repeated Service services = 1;
+  }
+  message Service{
+    string name = 1;
+    string endPoint = 2;
+    string version = 3;
+    string type = 4;
+
+  }
+  conf_type use_service_conf = 1;
+  LocalConfig local_config = 2;
+  PolarisConf polaris_config = 3;
+}
+
+message Server {
+  message HTTP {
+    string network = 1;
+    string addr = 2;
+    google.protobuf.Duration timeout = 3;
+    string prefix = 4;
+  }
+  message GRPC {
+    string network = 1;
+    string addr = 2;
+    google.protobuf.Duration timeout = 3;
+  }
+  message Websocket {
+    string network = 1;
+    string addr = 2;
+    string path = 3;
+    google.protobuf.Duration timeout = 4;
+  }
+  message Kafka{
+    repeated string addr = 1;
+    string codec = 2;
+  }
+  HTTP http = 1;
+  GRPC grpc = 2;
+  Websocket websocket = 3;
+  Kafka kafka = 4;
+}
+
+message Data {
+  message Database {
+    string driver = 1;
+    string source = 2;
+    int32 maxConnThreads = 3;
+    int32 maxLifeMinute = 4;
+
+  }
+  message Redis {
+    string addr = 1;
+    string pwd = 2;
+    int32 db = 3;
+    google.protobuf.Duration read_timeout = 4;
+    google.protobuf.Duration write_timeout = 5;
+    google.protobuf.Duration dial_timeout = 6;
+  }
+  Database database = 1;
+  Redis redis = 2;
+}
+message Log{
+  string infoFile = 1;
+  string warningFile = 2;
+  LogFileSplit split = 3;
+}
+message LogFileSplit{
+  int64 max_size = 1;
+  int64 max_backups = 2;
+  int64 max_age = 3;
+
+}
+message Test{
+  double bag_start_time = 1;
+  double bag_end_time = 2;
+  string bag_path = 3;
+}
+message OSS{
+  string endpoint = 1;
+  string internal_url = 2;
+  string internal_protocol = 3;
+  string access_key = 4;
+  string secret_key = 5;
+  string bucket_name = 6;
+  string temp_dir = 7;
+  string temp_path = 8;
+  string use = 9;
+  string basePath = 10;
+  string region = 11;
+  bool replace =12;
+  string internalEndpoint = 13;
+
+}
+message Jwt {
+  string secret = 1;
+  string issuer = 2;
+  int64 expireHours = 3;
+  int64 expireMinutes = 4;
+}
+message ChangAn{
+  string address = 1;
+  google.protobuf.Duration timeout = 2;
+  ImageService image_service = 3;
+  string inner_address = 4;
+  int64  e2e_groupid = 5;
+}
+message ImageService {
+  string type = 1;
+  string ak = 2;
+  string sk = 3;
+  string repository = 4;
+  string hubHost = 5;
+  string dockerHub = 6;
+  string harbo_dockerHub = 7;
+}
+
+// Password 初始密码生成策略配置
+// 默认 password 为固定值 Wuwen2026!, 也可开启随机生成
+message Password {
+  // 固定初始密码 (random=false 时使用)
+  string default = 1;
+  // 是否随机生成 (true=按规则随机生成, false=使用 default 固定值)
+  bool random = 2;
+  // 密码最小长度
+  int32 minLen = 3;
+  // 密码最大长度
+  int32 maxLen = 4;
+}

@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package xviz.v1;
+
+option csharp_namespace = "xviz.V1";
+option go_package = "wuwen.com/wwsi/api_gen/xviz/v1;v1";
+
+
+import "google/protobuf/descriptor.proto";
+
+extend google.protobuf.MessageOptions {
+  string xviz_json_schema = 54200;
+}

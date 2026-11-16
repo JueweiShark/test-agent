@@ -1,0 +1,22 @@
+// --------------------------------------------------------
+// WARNING: XVIZ Protobuf files are unstable, do not use
+// --------------------------------------------------------
+
+syntax = "proto3";
+
+package xviz.v1;
+
+option csharp_namespace = "xviz.V1";
+option go_package = "wuwen.com/wwsi/api_gen/xviz/v1;v1";
+
+
+import "google/protobuf/any.proto";
+
+message Envelope {
+  // Categorize the message, recommend pattern: "namespace/type"
+  // This allows for two levels of routing and filtering in an
+  // application.  And for subscription to just some messages.
+  string type = 1;
+
+  google.protobuf.Any data = 2;
+}

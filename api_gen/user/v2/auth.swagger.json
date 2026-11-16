@@ -1,0 +1,637 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "user/v2/auth.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "AuthV2"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v2/auth/groupToken": {
+      "post": {
+        "summary": "IssueGroupToken 校验基础 token 并换发携带 groupId 的组 token (数据隔离改造: groupId 入 Token)",
+        "operationId": "AuthV2_IssueGroupToken",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v2IssueGroupTokenReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v2IssueGroupTokenRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AuthV2"
+        ]
+      }
+    },
+    "/v2/auth/login": {
+      "post": {
+        "summary": "LoginV2 登录,返回token+用户关联的企业列表+按角色过滤后的权限信息",
+        "operationId": "AuthV2_LoginV2",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v2LoginV2Reply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v2LoginV2Request"
+            }
+          }
+        ],
+        "tags": [
+          "AuthV2"
+        ]
+      }
+    },
+    "/v2/auth/my/apps": {
+      "get": {
+        "summary": "ListMyApps 总览页查当前企业下我能进的平台",
+        "operationId": "AuthV2_ListMyApps",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v2ListMyAppsReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "type",
+            "description": "app 类型: platform=平台, link=链接; 不传=不限",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "AuthV2"
+        ]
+      }
+    },
+    "/v2/auth/userInfo": {
+      "post": {
+        "summary": "查询当前用户信息",
+        "operationId": "AuthV2_GetUserInfo",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v2GetUserInfoReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v2GetUserInfoRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AuthV2"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "userv2GroupInfo": {
+      "type": "object",
+      "properties": {
+        "groupId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "groupName": {
+          "type": "string"
+        },
+        "groupCode": {
+          "type": "string"
+        },
+        "groupCreatedAt": {
+          "type": "string",
+          "format": "int64",
+          "title": "企业创建时间"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/userv2RoleInfo"
+          }
+        },
+        "apps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v2AppInfo"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "int64",
+          "title": "创建时间"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "int64",
+          "title": "更新时间"
+        },
+        "remarks": {
+          "type": "string"
+        }
+      },
+      "title": "GroupInfo 企业信息"
+    },
+    "userv2PermissionInfo": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "integer",
+          "format": "int32",
+          "title": "0=backend 1=frontend 2=non"
+        },
+        "menuType": {
+          "type": "integer",
+          "format": "int32",
+          "title": "1=目录 2=菜单 3=按钮, 仅 type=1 时有效"
+        },
+        "routePath": {
+          "type": "string"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "sort": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "app": {
+          "type": "string",
+          "format": "int64",
+          "title": "平台id"
+        },
+        "path": {
+          "type": "string",
+          "title": "后端API路径"
+        },
+        "act": {
+          "type": "string",
+          "title": "HTTP method"
+        },
+        "code": {
+          "type": "string",
+          "format": "int64",
+          "title": "权限code"
+        },
+        "dependenceChildren": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "int64"
+          }
+        },
+        "dependenceParents": {
+          "type": "string",
+          "format": "int64"
+        },
+        "hidden": {
+          "type": "integer",
+          "format": "int32",
+          "title": "1显示 0隐藏"
+        },
+        "description": {
+          "type": "string",
+          "title": "备注"
+        }
+      },
+      "title": "PermissionInfo 权限/菜单信息"
+    },
+    "userv2RoleInfo": {
+      "type": "object",
+      "properties": {
+        "roleId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "roleName": {
+          "type": "string"
+        },
+        "remarks": {
+          "type": "string"
+        },
+        "system": {
+          "type": "integer",
+          "format": "int32",
+          "title": "1=系统角色不可编辑"
+        },
+        "groupId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "app": {
+          "type": "string",
+          "format": "int64",
+          "title": "老字段保留,新逻辑不读写"
+        },
+        "roleCode": {
+          "type": "string",
+          "title": "角色编码 role+id, 如 role00003, 创建后自动生成只读"
+        }
+      },
+      "title": "RoleInfo 角色信息"
+    },
+    "userv2UserInfo": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "username": {
+          "type": "string"
+        },
+        "nickname": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      },
+      "title": "UserInfo 用户基本信息"
+    },
+    "v2AppInfo": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        },
+        "entryUrl": {
+          "type": "string"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "sort": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int32",
+          "title": "1=显示 0=隐藏"
+        },
+        "type": {
+          "type": "string",
+          "title": "app 类型: platform=平台, link=链接"
+        },
+        "desc": {
+          "type": "string",
+          "title": "描述\u0026简介"
+        },
+        "detail": {
+          "type": "string"
+        },
+        "iconUrl": {
+          "type": "string",
+          "title": "返回 icon的url"
+        }
+      },
+      "title": "AppInfo 平台信息"
+    },
+    "v2CheckUserGroupAccessReply": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/v2CheckUserGroupAccessReplyData"
+        }
+      }
+    },
+    "v2CheckUserGroupAccessReplyData": {
+      "type": "object",
+      "properties": {
+        "hasAccess": {
+          "type": "boolean"
+        }
+      }
+    },
+    "v2GetUserInfoReply": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/v2GetUserInfoReplyData"
+        }
+      }
+    },
+    "v2GetUserInfoReplyData": {
+      "type": "object",
+      "properties": {
+        "userInfo": {
+          "$ref": "#/definitions/userv2UserInfo"
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/userv2GroupInfo"
+          },
+          "title": "用户关联的企业列表"
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/userv2PermissionInfo"
+          },
+          "title": "按角色过滤后的权限(菜单/按钮)"
+        },
+        "isSuperAdmin": {
+          "type": "boolean",
+          "title": "是否超管 (Role.Id==1)"
+        }
+      }
+    },
+    "v2GetUserInfoRequest": {
+      "type": "object",
+      "properties": {
+        "groupId": {
+          "type": "string",
+          "format": "int64",
+          "title": "超管传0 非超管必填"
+        }
+      }
+    },
+    "v2IssueGroupTokenReply": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/v2IssueGroupTokenReplyData"
+        }
+      },
+      "title": "IssueGroupTokenReply 换发组 token 响应"
+    },
+    "v2IssueGroupTokenReplyData": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string",
+          "title": "携带 groupId claim 的新 token"
+        },
+        "expireTime": {
+          "type": "string",
+          "format": "int64"
+        },
+        "userInfo": {
+          "$ref": "#/definitions/userv2UserInfo"
+        },
+        "group": {
+          "$ref": "#/definitions/userv2GroupInfo",
+          "title": "当前选择的企业的角色聚合 (超管为空)"
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/userv2PermissionInfo"
+          },
+          "title": "该企业有效权限 (超管为空)"
+        },
+        "isSuperAdmin": {
+          "type": "boolean"
+        }
+      }
+    },
+    "v2IssueGroupTokenRequest": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        },
+        "groupId": {
+          "type": "string",
+          "format": "int64",
+          "title": "目标企业 id; 超管可传 0 (签发全局 token)"
+        }
+      },
+      "title": "IssueGroupTokenRequest 换发组 token 请求\ntoken 为第一步 LoginV2 返回的基础 token, 服务端解析出 userId, 不信任前端直接传 userId"
+    },
+    "v2ListMyAppsReply": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/v2ListMyAppsReplyData"
+        }
+      }
+    },
+    "v2ListMyAppsReplyData": {
+      "type": "object",
+      "properties": {
+        "apps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v2AppInfo"
+          }
+        }
+      }
+    },
+    "v2LoginV2Reply": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/v2LoginV2ReplyData"
+        }
+      },
+      "title": "LoginV2Reply 登录响应"
+    },
+    "v2LoginV2ReplyData": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        },
+        "expireTime": {
+          "type": "string",
+          "format": "int64"
+        },
+        "userInfo": {
+          "$ref": "#/definitions/userv2UserInfo"
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/userv2GroupInfo"
+          },
+          "title": "用户关联的企业列表"
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/userv2PermissionInfo"
+          },
+          "title": "按角色过滤后的权限(菜单/按钮)"
+        },
+        "isSuperAdmin": {
+          "type": "boolean",
+          "title": "是否超管 (Role.Id==1)"
+        }
+      }
+    },
+    "v2LoginV2Request": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      },
+      "title": "LoginV2Request 登录请求"
+    }
+  }
+}

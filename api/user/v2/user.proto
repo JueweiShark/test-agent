@@ -1,0 +1,171 @@
+syntax = "proto3";
+
+package api.user.v2;
+
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "validate/validate.proto";
+import "user/v2/common.proto";
+
+option go_package = "wuwen.com/wwuc/api_gen/user/v2;v2";
+option java_multiple_files = true;
+option java_package = "api.user.v2";
+
+// UserV2 超管-用户管理 (手动创建,不登记手机号)
+service UserV2 {
+  // CreateUser 超管创建用户
+  rpc CreateUser (CreateUserV2Request) returns (CreateUserV2Reply){
+    option (google.api.http) = {
+      post:"/v2/user",
+      body:"*",
+    };
+  };
+  // UpdateUser 更新用户信息 (昵称/显隐状态/备注)
+  rpc UpdateUser (UpdateUserV2Request) returns (UpdateUserV2Reply){
+    option (google.api.http) = {
+      put:"/v2/user/{userId}",
+      body:"*",
+    };
+  };
+  // ResetPassword 超管重置用户密码
+  rpc ResetPassword (ResetPasswordRequest) returns (ResetPasswordReply){
+    option (google.api.http) = {
+      post:"/v2/user/{userId}/reset_password",
+      body:"*",
+    };
+  };
+  // ListUsers 用户名单
+  rpc ListUsers (ListUsersV2Request) returns (ListUsersV2Reply){
+    option (google.api.http) = {
+      get:"/v2/user",
+    };
+  };
+  // GetUser 查用户详情
+  rpc GetUser (GetUserV2Request) returns (GetUserV2Reply){
+    option (google.api.http) = {
+      get:"/v2/user/{userId}",
+    };
+  };
+
+  // UpdatePassword 超管修改用户密码 (超管指定新密码, 不回显明文)
+  rpc UpdatePassword (UpdatePasswordRequest) returns (UpdatePasswordReply){
+    option (google.api.http) = {
+      put:"/v2/user/{userId}/password",
+      body:"*",
+    };
+  };
+}
+
+message CreateUserV2Request {
+  string username = 1 [(validate.rules).string.min_len = 1];
+  // password 已废弃: 后端自动生成密码并返回, 前端无需传入
+  string password = 2;
+  string nickname = 3;
+  // 1 启用 2停用
+  int32 status = 4;
+  // 备注
+  string remarks = 5;
+}
+
+message CreateUserV2Reply {
+  int32 code = 1;
+  string message = 2;
+  message Data {
+    UserInfo userInfo = 3;
+    // password 后端自动生成的初始密码 (明文, 仅本次返回)
+    string password = 4;
+  }
+  Data data = 3;
+}
+
+message ResetPasswordRequest {
+  int64 userId = 1 [(validate.rules).int64.gt = 0];
+  // password 已废弃: 后端自动生成新密码并返回, 前端无需传入
+  string password = 2;
+}
+
+message ResetPasswordReply {
+  int32 code = 1;
+  string message = 2;
+  message Data {
+    // password 后端自动生成的新密码 (明文, 仅本次返回)
+    string password = 3;
+  }
+  Data data = 3;
+}
+
+message UpdatePasswordRequest {
+  int64 userId = 1 [(validate.rules).int64.gt = 0];
+  // password 超管指定的新密码 (明文, 后端校验规则后哈希存储, 不回显)
+  string password = 2 [(validate.rules).string.min_len = 1];
+}
+
+message UpdatePasswordReply {
+  int32 code = 1;
+  string message = 2;
+}
+
+message ListUsersV2Request {
+  int32 page = 1;
+  int32 pageSize = 2;
+  string username = 3;
+  string nickname = 4;
+  int32 status = 5;
+}
+
+message UserDetailInfo {
+  // ID
+  int64 userId = 1;
+  // 用户名
+  string username = 2;
+  // 姓名&昵称
+  string nickname = 3;
+  // 状态
+  int32 status = 4;
+  // 创建时间
+  int64 createdAt = 5;
+  // 上次登录数据
+  int64 lastLoginAt = 6;
+  // 更新时间
+  int64 updatedAt = 7;
+  // 备注
+  string remarks = 8;
+}
+
+message ListUsersV2Reply {
+  int32 code = 1;
+  string message = 2;
+  message Data {
+    repeated UserDetailInfo list = 3;
+    int64 total = 4;
+  }
+  Data data = 3;
+}
+
+message GetUserV2Request {
+  int64 userId = 1 [(validate.rules).int64.gt = 0];
+}
+
+message GetUserV2Reply {
+  int32 code = 1;
+  string message = 2;
+  message Data {
+    UserDetailInfo user = 3;
+  }
+  Data data = 3;
+}
+
+message UpdateUserV2Request {
+  int64 userId = 1 [(validate.rules).int64.gt = 0];
+  // 姓名&昵称
+  string nickname = 2;
+  // 显隐状态 1=显示 0=隐藏 (复用 status 字段)
+  int32 status = 3;
+  // 备注
+  string remarks = 4;
+}
+
+message UpdateUserV2Reply {
+  int32 code = 1;
+  string message = 2;
+}

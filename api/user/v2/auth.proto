@@ -1,0 +1,137 @@
+syntax = "proto3";
+
+package api.user.v2;
+
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "validate/validate.proto";
+import "user/v2/common.proto";
+
+option go_package = "wuwen.com/wwuc/api_gen/user/v2;v2";
+option java_multiple_files = true;
+option java_package = "api.user.v2";
+
+// AuthV2 登录与总览
+service AuthV2 {
+  // LoginV2 登录,返回token+用户关联的企业列表+按角色过滤后的权限信息
+  rpc LoginV2 (LoginV2Request) returns (LoginV2Reply){
+    option (google.api.http) = {
+      post:"/v2/auth/login",
+      body:"*",
+    };
+  };
+  // ListMyApps 总览页查当前企业下我能进的平台
+  rpc ListMyApps (ListMyAppsRequest) returns (ListMyAppsReply){
+    option (google.api.http) = {
+      get:"/v2/auth/my/apps",
+    };
+  };
+  // CheckUserGroupAccess 校验userId是否有权访问groupId (gRPC,供下游/网关调用)
+  rpc CheckUserGroupAccess (CheckUserGroupAccessRequest) returns (CheckUserGroupAccessReply);
+
+  // IssueGroupToken 校验基础 token 并换发携带 groupId 的组 token (数据隔离改造: groupId 入 Token)
+  rpc IssueGroupToken (IssueGroupTokenRequest) returns (IssueGroupTokenReply){
+    option (google.api.http) = {
+      post:"/v2/auth/groupToken",
+      body:"*",
+    };
+  };
+//  rpc checkToken(checkTokenRequest)returns (checkTokenReply){};
+
+  // 查询当前用户信息
+  rpc GetUserInfo (GetUserInfoRequest) returns (GetUserInfoReply){
+    option (google.api.http) = {
+      post:"/v2/auth/userInfo",
+      body:"*",
+    };
+  };
+}
+
+// LoginV2Request 登录请求
+message LoginV2Request {
+  string username = 1 [(validate.rules).string.min_len = 1];
+  string password = 2 [(validate.rules).string.min_len = 1];
+}
+
+// LoginV2Reply 登录响应
+message LoginV2Reply {
+  int32 code = 1;
+  string message = 2;
+  message Data {
+    string token = 3;
+    int64 expireTime = 4;
+    UserInfo userInfo = 5;
+    repeated GroupInfo groups = 6;       // 用户关联的企业列表
+    repeated PermissionInfo permissions = 7; // 按角色过滤后的权限(菜单/按钮)
+    bool isSuperAdmin = 8;             // 是否超管 (Role.Id==1)
+  }
+  Data data = 3;
+}
+
+message ListMyAppsRequest {
+  int64 groupId = 1;
+  string type = 2;     // app 类型: platform=平台, link=链接; 不传=不限
+}
+
+message ListMyAppsReply {
+  int32 code = 1;
+  string message = 2;
+  message Data {
+    repeated AppInfo apps = 3;
+  }
+  Data data = 3;
+}
+
+message CheckUserGroupAccessRequest {
+  int64 userId = 1;
+  int64 groupId = 2;
+}
+
+message CheckUserGroupAccessReply {
+  int32 code = 1;
+  string message = 2;
+  message Data {
+    bool hasAccess = 3;
+  }
+  Data data = 3;
+}
+
+// IssueGroupTokenRequest 换发组 token 请求
+// token 为第一步 LoginV2 返回的基础 token, 服务端解析出 userId, 不信任前端直接传 userId
+message IssueGroupTokenRequest {
+  string token = 1 [(validate.rules).string.min_len = 1];
+  // 目标企业 id; 超管可传 0 (签发全局 token)
+  int64 groupId = 2;
+}
+
+// IssueGroupTokenReply 换发组 token 响应
+message IssueGroupTokenReply {
+  int32 code = 1;
+  string message = 2;
+  message Data {
+    string token = 3;                    // 携带 groupId claim 的新 token
+    int64 expireTime = 4;
+    UserInfo userInfo = 5;
+    GroupInfo group = 6;                 // 当前选择的企业的角色聚合 (超管为空)
+    repeated PermissionInfo permissions = 7; // 该企业有效权限 (超管为空)
+    bool isSuperAdmin = 8;
+  }
+  Data data = 3;
+}
+
+message GetUserInfoRequest {
+  // 超管传0 非超管必填
+  int64 groupId = 1;
+}
+
+message GetUserInfoReply {
+  int32 code = 1;
+  string message = 2;
+  message Data {
+    UserInfo userInfo = 5;
+    repeated GroupInfo groups = 6;       // 用户关联的企业列表
+    repeated PermissionInfo permissions = 7; // 按角色过滤后的权限(菜单/按钮)
+    bool isSuperAdmin = 8;             // 是否超管 (Role.Id==1)
+  }
+  Data data = 3;
+}

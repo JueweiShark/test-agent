@@ -1,0 +1,166 @@
+syntax = "proto3";
+
+package api.user.v2;
+
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "validate/validate.proto";
+import "user/v2/common.proto";
+
+option go_package = "wuwen.com/wwuc/api_gen/user/v2;v2";
+option java_multiple_files = true;
+option java_package = "api.user.v2";
+
+// SystemV2 系统配置 (登录页配置/产品 app 维护)
+service SystemV2 {
+  // GetSystemConfig 获取登录页配置
+//  rpc GetSystemConfig (GetSystemConfigRequest) returns (GetSystemConfigReply){
+//    option (google.api.http) = {
+//      get:"/v2/system/config",
+//    };
+//  };
+//  // SetSystemConfig 超管设置登录页配置
+//  rpc SetSystemConfig (SetSystemConfigRequest) returns (SetSystemConfigReply){
+//    option (google.api.http) = {
+//      post:"/v2/system/config",
+//      body:"*",
+//    };
+//  };
+
+
+  // ListApps 拿产品列表 (总览图标)
+  rpc ListApps (ListAppsRequest) returns (ListAppsReply){
+    option (google.api.http) = {
+      get:"/v2/system/apps",
+    };
+  };
+  // ListAppsByPage 分页查询产品列表 (管理端)
+  rpc ListAppsByPage (ListAppsByPageRequest) returns (ListAppsByPageReply){
+    option (google.api.http) = {
+      get:"/v2/system/apps/page",
+    };
+  };
+  // CreateApp 超管创建产品
+  rpc CreateApp (CreateAppRequest) returns (CreateAppReply){
+    option (google.api.http) = {
+      post:"/v2/system/apps",
+      body:"*",
+    };
+  };
+  // UpdateApp 超管更新产品
+  rpc UpdateApp (UpdateAppRequest) returns (UpdateAppReply){
+    option (google.api.http) = {
+      put:"/v2/system/apps/{app_id}",
+      body:"*",
+    };
+  };
+  // 删除App
+  rpc DeleteApp (DeleteAppRequest) returns (DeleteAppReply){
+    option (google.api.http) = {
+      delete:"/v2/system/apps/{app_id}",
+    };
+  };
+}
+
+message GetSystemConfigRequest {
+  string config_key = 1;  // 不传=返回所有
+}
+
+message GetSystemConfigReply {
+  int32 code = 1;
+  string message = 2;
+  message Data {
+    map<string, string> configs = 3;
+  }
+  Data data = 3;
+}
+
+message SetSystemConfigRequest {
+  map<string, string> configs = 1;
+}
+
+message SetSystemConfigReply {
+  int32 code = 1;
+  string message = 2;
+}
+
+message ListAppsRequest {
+  int64 group_id = 1;  // 当前用户所在企业 id
+  string type = 2;     // app 类型: platform=平台, link=链接; 不传=不限
+}
+
+message ListAppsReply {
+  int32 code = 1;
+  string message = 2;
+  message Data {
+    repeated AppInfo apps = 3;
+  }
+  Data data = 3;
+}
+
+message ListAppsByPageRequest {
+  int32 page = 1;
+  int32 pageSize = 2;
+  string name = 3;       // 显示名 (模糊匹配)
+  string code = 4;       // app 编号 (模糊匹配)
+  int32 status = 5;      // 1=显示 0=隐藏, 0=不限
+  string type = 6;       // app 类型: platform=平台, link=链接; 不传=不限
+}
+
+message ListAppsByPageReply {
+  int32 code = 1;
+  string message = 2;
+  message Data {
+    repeated AppInfo list = 3;
+    int64 total = 4;
+  }
+  Data data = 3;
+}
+
+message CreateAppRequest {
+  string name = 1 [(validate.rules).string.min_len = 1];
+  string code = 2;
+  string entryUrl = 3;
+  string icon = 4;
+  int32 sort = 5;
+  string type = 6;       // app 类型: platform=平台, link=链接
+  string desc = 7;       // 描述&简介
+  string detail = 8;     // JSON扩展
+  int32 status = 9;      // 1=显示 0=隐藏
+}
+
+message CreateAppReply {
+  int32 code = 1;
+  string message = 2;
+  message Data {
+    AppInfo app = 3;
+  }
+  Data data = 3;
+}
+
+message UpdateAppRequest {
+  int64 app_id = 1 [(validate.rules).int64.gt = 0];
+  string name = 2;
+  string code = 3;
+  string entryUrl = 4;
+  string icon = 5;
+  int32 sort = 6;
+  string type = 7;       // app 类型: platform=平台, link=链接
+  string desc = 8;       // 描述&简介
+  string detail = 9;     // JSON扩展
+  int32 status = 10;     // 1=显示 0=隐藏
+}
+
+message UpdateAppReply {
+  int32 code = 1;
+  string message = 2;
+}
+
+message DeleteAppRequest {
+  int64 app_id = 1 [(validate.rules).int64.gt = 0];
+}
+
+message DeleteAppReply {
+  int32 code = 1;
+  string message = 2;
+}

@@ -1,0 +1,230 @@
+syntax = "proto3";
+
+package api.user.v2;
+
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "validate/validate.proto";
+import "user/v2/common.proto";
+
+option go_package = "wuwen.com/wwuc/api_gen/user/v2;v2";
+option java_multiple_files = true;
+option java_package = "api.user.v2";
+
+// RoleV2 企业角色管理
+service RoleV2 {
+  // CreateRole 超管为指定企业建角色
+  rpc CreateRole (CreateRoleV2Request) returns (CreateRoleV2Reply){
+    option (google.api.http) = {
+      post:"/v2/role",
+      body:"*",
+    };
+  };
+  // UpdateRole 编辑角色
+  rpc UpdateRole (UpdateRoleV2Request) returns (UpdateRoleV2Reply){
+    option (google.api.http) = {
+      put:"/v2/role/{roleId}",
+      body:"*",
+    };
+  };
+  // DeleteRole 删除角色 (System=1 不可删)
+  rpc DeleteRole (DeleteRoleV2Request) returns (DeleteRoleV2Reply){
+    option (google.api.http) = {
+      delete:"/v2/role/{roleId}",
+    };
+  };
+  // ListRolesByGroup 查企业下的角色列表
+  rpc ListRolesByGroup (ListRolesByGroupRequest) returns (ListRolesByGroupReply){
+    option (google.api.http) = {
+      get:"/v2/role",
+    };
+  };
+  // AssignRoleToUser 超管给企业加员工
+  rpc AssignRoleToUser (AssignRoleRequest) returns (AssignRoleReply){
+    option (google.api.http) = {
+      post:"/v2/role_assign",
+      body:"*",
+    };
+  };
+  // UpdateGroupEmployee 修改企业员工的角色/状态/备注 (全量覆盖角色)
+  rpc UpdateGroupEmployee (UpdateGroupEmployeeRequest) returns (UpdateGroupEmployeeReply){
+    option (google.api.http) = {
+      put:"/v2/role_assign",
+      body:"*",
+    };
+  };
+  // RemoveRoleFromUser 移除用户角色绑定
+  rpc RemoveRoleFromUser (RemoveRoleRequest) returns (RemoveRoleReply){
+    option (google.api.http) = {
+      delete:"/v2/role_assign",
+    };
+  };
+  // ListUsersByGroup 查企业下员工列表
+  rpc ListUsersByGroup (ListUsersByGroupRequest) returns (ListUsersByGroupReply){
+    option (google.api.http) = {
+      get:"/v2/role/users",
+    };
+  };
+  // ListUserRolesByGroup 用户在某企业的角色
+  rpc ListUserRolesByGroup (ListUserRolesRequest) returns (ListUserRolesReply){
+    option (google.api.http) = {
+      get:"/v2/role/user",
+    };
+  };
+}
+
+message CreateRoleV2Request {
+  string name = 1 [(validate.rules).string.min_len = 1];
+  int64 groupId = 2 [(validate.rules).int64.gt = 0];
+  string remarks = 3;
+  repeated int64 permission_ids = 4 [(validate.rules).repeated.min_items = 1];  // 初始权限 (须 ⊆ 企业 scope, 否则 403 PermissionOutOfScope)
+}
+
+message CreateRoleV2Reply {
+  int32 code = 1;
+  string message = 2;
+  message Data {
+    RoleInfo role = 3;
+  }
+  Data data = 3;
+}
+
+message UpdateRoleV2Request {
+  int64 roleId = 1 [(validate.rules).int64.gt = 0];
+  string name = 2;
+  string remarks = 3;
+  repeated int64 permission_ids = 4 [(validate.rules).repeated.min_items = 1];  // 全量覆盖 (空=清空; 须 ⊆ 企业 scope)
+}
+
+message UpdateRoleV2Reply {
+  int32 code = 1;
+  string message = 2;
+}
+
+message DeleteRoleV2Request {
+  int64 roleId = 1 [(validate.rules).int64.gt = 0];
+}
+
+message DeleteRoleV2Reply {
+  int32 code = 1;
+  string message = 2;
+}
+
+// ListRolesByGroupRequest 角色列表查询
+// - groupId > 0 时按企业ID精准搜
+// - groupName 非空时按企业名称模糊搜
+// - name 非空时按角色名称模糊搜
+// - 全部条件为空时返回所有企业的角色
+message ListRolesByGroupRequest {
+  // 企业ID (精准匹配, 0=不限企业)
+  int64 groupId = 1;
+  // 角色名称 (模糊匹配)
+  string name = 2;
+  int32 page = 3;
+  int32 pageSize = 4;
+  // 企业名称 (模糊匹配)
+  string groupName = 5;
+}
+
+message ListRolesByGroupReply {
+  int32 code = 1;
+  string message = 2;
+  message Data {
+    repeated RoleDetailInfo list = 3;
+    int64 total = 4;
+  }
+  Data data = 3;
+}
+
+message AssignRoleRequest {
+  int64 userId = 1 [(validate.rules).int64.gt = 0];
+  int64 groupId = 2 [(validate.rules).int64.gt = 0];
+  repeated int64 roleIds = 3;        // 用户在该企业的多个角色 (须 ⊆ 该企业 scope)
+  int32 status = 4;                  // 0:禁用 1:启用 (默认 1)
+  string remarks = 5;                // 备注信息
+}
+
+message AssignRoleReply {
+  int32 code = 1;
+  string message = 2;
+}
+
+message UpdateGroupEmployeeRequest {
+  int64 userId = 1 [(validate.rules).int64.gt = 0];
+  int64 groupId = 2 [(validate.rules).int64.gt = 0];
+  repeated int64 roleIds = 3;        // 全量覆盖角色 (空=清空角色绑定, 但不删 ref_user_group)
+  int32 status = 4;                  // 0:禁用 1:启用
+  string remarks = 5;                // 备注信息
+}
+
+message UpdateGroupEmployeeReply {
+  int32 code = 1;
+  string message = 2;
+}
+
+message RemoveRoleRequest {
+  int64 userId = 1 [(validate.rules).int64.gt = 0];
+  int64 roleId = 2 [(validate.rules).int64.gt = 0];
+  int64 groupId = 3 [(validate.rules).int64.gt = 0];
+}
+
+message RemoveRoleReply {
+  int32 code = 1;
+  string message = 2;
+}
+
+message ListUsersByGroupRequest {
+  // 企业ID (可选, 0=不限企业, 跨企业搜索)
+  int64 groupId = 1;
+  // 用户名 (模糊)
+  string username = 2;
+  // 姓名 (模糊)
+  string nickname = 3;
+  int32 page = 4;
+  int32 pageSize = 5;
+  // 关联企业名称 (模糊)
+  string groupName = 6;
+  // 状态 (0=禁用 1=启用, 0=不限状态 — 注: proto3 默认值无法区分"不限"与"禁用", 故<=0 视为不限)
+  int32 status = 7;
+}
+
+message ListUsersByGroupReply {
+  int32 code = 1;
+  string message = 2;
+  message Data {
+    repeated GroupUserInfo list = 3;
+    int64 total = 4;
+  }
+  Data data = 3;
+}
+
+message GroupUserInfo {
+  // 数据对应id (ref_user_group.id, 唯一标识一条员工-企业记录)
+  int64 refId = 1;
+  int64 userId = 2;
+  string username = 3;
+  string nickname = 4;
+  // 关联企业
+  int64 groupId = 5;
+  string groupName = 6;
+  string groupCode = 7;
+  repeated RoleInfo roles = 8;
+  string remarks = 9;     // 备注 (来自 ref_user_group.remarks)
+  int32 status = 10;     // 状态 (来自 ref_user_group.status)
+  int64 createdAt = 11;  // 创建时间 (来自 ref_user_group.created_time)
+  int64 updatedAt = 12;  // 更新时间 (来自 ref_user_group.updated_time)
+}
+
+message ListUserRolesRequest {
+  int64 userId = 1 [(validate.rules).int64.gt = 0];
+  int64 groupId = 2 [(validate.rules).int64.gt = 0];
+}
+
+message ListUserRolesReply {
+  int32 code = 1;
+  string message = 2;
+  message Data {
+    repeated RoleInfo roles = 3;
+  }
+  Data data = 3;
+}

@@ -1,0 +1,247 @@
+syntax = "proto3";
+
+package api.user.v1;
+
+import "google/api/annotations.proto";
+import "user/v1/role.proto";
+
+option go_package = "wuwen.com/wwuc/api_gen/user/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.user.v1";
+
+service Group {
+
+  rpc ListGroupAll (ListGroupAllRequest) returns (ListGroupAllReply){
+    option (google.api.http) = {
+      get: "/group/all",
+    };
+  };
+
+  rpc GetGroup (GetGroupRequest) returns (GetGroupReply){
+    option (google.api.http) = {
+      get: "/group/{id}",
+    };
+  };
+  rpc CreateGroup (CreateGroupRequest) returns (CreateGroupReply){
+    option (google.api.http) = {
+      post:"/group",
+      body:"*",
+    };
+  };
+  rpc UpdateGroup (UpdateGroupRequest) returns (UpdateGroupReply){
+    option (google.api.http) = {
+      put:"/group/{id}",
+      body:"*",
+    };
+  };
+  rpc DeleteGroup (DeleteGroupRequest) returns (DeleteGroupReply){
+    option (google.api.http) = {
+      delete: "/group/{id}",
+    };
+  };
+
+  rpc ListGroup (ListGroupRequest) returns (ListGroupReply){
+    option (google.api.http) = {
+      get: "/group",
+    };
+  };
+
+  // 按名称或 ids 获取分组列表（不分页）
+  rpc FindGroupList (FindGroupListRequest) returns (FindGroupListReply){
+    option (google.api.http) = {
+      post:"/group/find",
+      body:"*",
+    };
+  };
+
+  rpc MemberList (MemberListRequest) returns (MemberListReply){
+    option (google.api.http) = {
+      get: "/groupInfo/member",
+    };
+  };
+  rpc AddMember (AddMemberRequest) returns (AddMemberReply){
+    option (google.api.http) = {
+      put: "/groupInfo/member",
+      body: "*"
+    };
+  };
+  rpc RemoveMember (RemoveMemberRequest) returns (AddMemberReply){
+    option (google.api.http) = {
+      post: "/groupInfo/member",
+      body: "*"
+    };
+  };
+}
+
+message GroupInfo{
+  //  message Manager{
+  //    int64 id = 1;
+  //    string nickname = 2;
+  //  }
+  int64 id = 1; // 团队id
+  string name = 2; // 团队名称
+
+  //所在群组角色  超级管理员时，为空
+  repeated RoleInfo role = 3;
+  int64 createdAt = 4; // 创建时间
+  repeated string managers = 5; // 管理员昵称
+  string remarks = 6; //备注
+  int32 groupType = 7; // 类型: 1-自有团队, 2-供应商
+  //int64 userNumber = 7; // 用户数
+}
+message MemberInfo{
+  message Role{
+    int64 id = 1 ;
+    string name = 2;
+  }
+  optional int64 id = 1;
+  optional string username = 2;
+  string nickname = 3;
+  repeated Role role = 4;
+  string provider = 5;
+  string createdBy = 6;
+  int64 createdAt = 7;
+  int32 status = 8;
+  RoleInfo roleInfo = 9;
+}
+
+message CreateGroupRequest {
+  string name = 1;
+  repeated int64 managers = 2;
+  int64 appId = 3;  //应用app的ID 1:仿真 2:具身
+  string remarks = 4; //备注
+  int32 groupType = 5; // 类型: 1-自有团队, 2-供应商
+}
+message CreateGroupReply {
+  int32 code = 1;
+  string message = 2;
+  int64 data = 3; // 组织 id
+}
+
+message UpdateGroupRequest {
+  int64 id = 1;
+  string name = 2;
+  repeated int64 managers = 3;
+  string remarks = 4; //备注
+  int32 groupType = 5; // 类型: 1-自有团队, 2-供应商
+}
+message UpdateGroupReply {
+  int32 code = 1;
+  string message = 2;
+  int64 data = 3; // 组织 id
+}
+
+message DeleteGroupRequest {
+  int64 id = 1;
+}
+message DeleteGroupReply {
+  int32 code = 1;
+  string message = 2;
+}
+
+message GetGroupRequest {
+  int64 id = 1;
+}
+message GetGroupReply {
+  int32 code = 1;
+  string message = 2;
+  GroupInfo data = 3;
+}
+
+message ListGroupRequest {
+  int64 pageNo = 1;
+  int64 pageSize = 2;
+  optional string name = 3; // 筛选项：名称
+  optional int32 groupType = 4; // 筛选项：类型 1-自有团队 2-供应商
+}
+message ListGroupReply {
+  message Data{
+    int64 total = 1;
+    int64 pageSize = 2;
+    int64 pageNo = 3;
+    repeated GroupInfo list = 4;
+  }
+  int32 code = 1;
+  string message = 2;
+  Data data = 3;
+}
+
+message ListGroupAllRequest {
+  int64 pageNo = 1;
+  int64 pageSize = 2;
+  optional string name = 3;     // 筛选项：名称
+  optional int32 groupType = 4; // 筛选项：类型 1-自有团队 2-供应商
+  optional int32 app = 5;       // 所属应用 1-仿真 2-具身
+}
+
+message ListGroupAllReply {
+  message Group {
+    int64 id = 1; // 团队id
+    string name = 2; // 团队名称
+    string remarks = 6; //备注
+    int32 groupType = 7; // 类型: 1-自有团队, 2-供应商
+  }
+  message Data{
+    int64 total = 1;
+    int64 pageSize = 2;
+    int64 pageNo = 3;
+    repeated Group list = 4;
+  }
+  int32 code = 1;
+  string message = 2;
+  Data data = 3;
+}
+message FindGroupListRequest {
+  string name = 1; // 筛选项：名称（模糊匹配）
+  repeated int64 ids = 2;   // 筛选项：分组 ids
+  int64 appId = 3; //具身：2
+}
+message FindGroupListReply {
+  int32 code = 1;
+  string message = 2;
+  repeated GroupInfo data = 3;
+}
+message AddMemberRequest{
+  message Info{
+    optional int64 id = 1;
+    optional string username = 2;
+  }
+  int64 groupId = 1;
+  repeated Info members = 2;
+}
+message RemoveMemberRequest{
+  int64 groupId = 1;
+  repeated int64 members = 2;
+}
+message  AddMemberReply {
+  int32 code = 1;
+  string message = 2;
+  int64 data = 3;
+}
+message DelMemberRequest{
+  int64 group_id = 1;
+  repeated int64 memberIds = 2;
+}
+message  DelMemberReply {
+  int32 code = 1;
+  string message = 2;
+}
+message MemberListRequest{
+  int64 groupId = 1;
+  int64 pageNo = 2;
+  int64 pageSize = 3;
+  optional string nickname = 4; // 筛选：昵称
+  optional string username = 5; // 筛选：账号
+}
+message MemberListReply{
+  message Data{
+    int64 total = 1;
+    int64 pageSize = 2;
+    int64 pageNo = 3;
+    repeated MemberInfo list = 4;
+  }
+  int32 code = 1;
+  string message = 2;
+  Data data = 3;
+
+}
